@@ -9,30 +9,34 @@ if (filter_has_var(INPUT_POST, "Registrarse")) {
     header("Location: ../Vista/registro.html");
     die();
 } elseif (filter_has_var(INPUT_POST, "Entrar")) {
-    // Comprobamos si ya existe una sesión activa
+// Comprobamos si ya existe una sesión activa
     session_start();
-    if (isset($_SESSION['usuario'])) {
-        $mensajeSesion = "El usuario registrado tiene una sesión activa.";
+    if (isset($_SESSION['usuario']) && $_SESSION['rol'] == "administrador") {
+        header("Location: ../Vista/areaAdmin.php");
+    } else if (isset($_SESSION['usuario']) && $_SESSION['rol'] == "usuario") {
+        header("Location: ../Vista/reservar_espectaculo.php");
+    } else if (isset($_SESSION['usuario']) && $_SESSION['rol'] == "invitado") {
+        header("Location: ../Vista/ver_espectaculos.php");
     } else {
-        // Creación de la conexión
+// Creación de la conexión
         $conexionBD = Conexion::conectarEspectaculosMySQLi();
 
-        // Validación del usuario y la contraseña
+// Validación del usuario y la contraseña
         $usuarioLogin = validarUsuarioExistenteMySQLi(filter_input(INPUT_POST, "usuarioExistente"), $conexionBD);
         if ($usuarioLogin) {
-            // Comprobamos la contraseña
+// Comprobamos la contraseña
             $conexionBD->autocommit(false);
             $consultaSesiones = $conexionBD->query("SELECT contraseña FROM usuarios WHERE login='$usuarioLogin'");
             if ($consultaSesiones->num_rows > 0) {
                 $contraseña = $consultaSesiones->fetch_assoc();
                 $contraseñaEncriptada = hash("sha512", filter_input(INPUT_POST, "contraseñaExistente"));
 
-                // Verificamos que las contraseñas coincidan
+// Verificamos que las contraseñas coincidan
                 if ($contraseñaEncriptada === $contraseña['contraseña']) {
                     $_SESSION['usuario'] = $usuarioLogin;
                     $mensajeExito .= "Inicio de sesión realizado con éxito. \n";
 
-                    // Recuperamos el rol del usuario
+// Recuperamos el rol del usuario
                     $buscarRolUsuarioRegistrado = $conexionBD->query("SELECT id_rol FROM usuarios WHERE login='$usuarioLogin'");
                     if ($buscarRolUsuarioRegistrado->num_rows > 0) {
                         $rolUsuarioRegistrado = $buscarRolUsuarioRegistrado->fetch_assoc()['id_rol'];
@@ -40,7 +44,7 @@ if (filter_has_var(INPUT_POST, "Registrarse")) {
                         if ($buscarTipoRolUsuarioRegistrado->num_rows > 0) {
                             $rol = $buscarTipoRolUsuarioRegistrado->fetch_assoc()['tipo'];
                             $_SESSION['rol'] = $rol;
-                            // Redirección según el rol del usuario
+// Redirección según el rol del usuario
                             switch ($_SESSION['rol']) {
                                 case "administrador":
                                     header("Location: ../Vista/areaAdmin.php");

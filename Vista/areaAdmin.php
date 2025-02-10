@@ -1,6 +1,6 @@
 <?php
 session_start();
-if (!isset($_SESSION['usuario']) || $_SESSION['rol'] == "usuario") {
+if (!isset($_SESSION['usuario']) || $_SESSION['rol'] != "administrador") {
     session_destroy();
     header("location:login.html");
 } else {
