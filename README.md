@@ -1,4 +1,4 @@
-# Aplicación de Usuarios por Roles
+# Aplicación Básica MVC, de gestión de actores mediante usuarios filtrados por roles.
 
 Este es un proyecto sencillo desarrollado en **PHP** y **MySQLi** que permite separar a los usuarios por roles y mostrar vistas diferentes según su perfil.
 
